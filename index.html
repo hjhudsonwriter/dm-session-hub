@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DM Session Hub</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="brandTitle">DM Session Hub</div>
+      <div class="brandSub" id="subTitle">Upload session notes to begin</div>
+    </div>
+
+    <div class="topActions">
+      <button class="btn ghost" id="btnReset" title="Clear loaded PDF + summary">Reset</button>
+    </div>
+  </header>
+
+  <!-- UPLOADER SCREEN -->
+  <main class="shell" id="screenUpload">
+    <section class="panel hero">
+      <h1>DM Session Hub</h1>
+      <p class="muted">
+        Upload your session notes PDF. If your PDF has bookmarks like “Scene 1”, “Scene 2”, etc,
+        the hub will split it into clickable scenes automatically.
+      </p>
+
+      <label class="uploader">
+        <input id="pdfInput" type="file" accept="application/pdf" />
+        <span class="uploaderBtn">Choose PDF</span>
+        <span class="uploaderHint" id="uploadHint">No file selected</span>
+      </label>
+
+      <div class="hint">
+        Pro-tip: In your PDF editor, add bookmarks titled exactly <b>Scene 1</b>, <b>Scene 2</b>… for perfect splitting.
+      </div>
+    </section>
+  </main>
+
+  <!-- MAIN READER -->
+  <main class="shell" id="screenMain" hidden>
+    <section class="panel wide">
+      <div class="sceneBar" id="sceneBar"></div>
+
+      <div class="sceneBody">
+        <div class="sceneHeader">
+          <div>
+            <div class="sceneTitle" id="sceneTitle">Scene</div>
+            <div class="muted" id="sceneMeta"></div>
+          </div>
+
+          <div class="sceneNav">
+            <button class="btn ghost" id="btnPrev">◀ Prev</button>
+            <button class="btn" id="btnNext">Complete Scene - Next</button>
+          </div>
+        </div>
+
+        <div class="readerWrap">
+          <div class="reader" id="reader"></div>
+        </div>
+
+        <div class="lootBox">
+          <label for="lootNotes">Loot notes for this scene</label>
+          <textarea id="lootNotes" placeholder="e.g. Dannick: Moonsteel Dagger • Em: 40gp • Maerys: Aurushi Sigil"></textarea>
+          <div class="hint">These notes get added to the final Session Summary when you click “Complete Scene - Next”.</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- SUMMARY -->
+  <main class="shell" id="screenSummary" hidden>
+    <section class="panel wide">
+      <div class="summaryHead">
+        <div>
+          <div class="sceneTitle">Session Summary</div>
+          <div class="muted">Revealed info + loot notes gathered as you ran the session.</div>
+        </div>
+        <div class="summaryActions">
+          <button class="btn ghost" id="btnBackToScenes">Back to Scenes</button>
+          <button class="btn" id="btnDownloadSummary">Download Session Summary (PDF)</button>
+        </div>
+      </div>
+
+      <div class="summaryBody" id="summaryBody"></div>
+    </section>
+  </main>
+
+  <!-- pdf.js (legacy build works nicely on GitHub Pages) -->
+  <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/legacy/build/pdf.min.js"></script>
+  <script>
+    if (window.pdfjsLib) {
+      pdfjsLib.GlobalWorkerOptions.workerSrc =
+        "https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/legacy/build/pdf.worker.min.js";
+    }
+  </script>
+
+  <!-- html2pdf for exporting the summary -->
+  <script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
+
+  <script src="./app.js"></script>
+</body>
+</html>
