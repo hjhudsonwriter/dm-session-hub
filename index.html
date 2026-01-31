@@ -2,105 +2,230 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>DM Session Hub</title>
-  <link rel="stylesheet" href="./styles.css" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>The Ironbow Bastion Manager</title>
+  <link rel="stylesheet" href="styles.css" />
 </head>
-
 <body>
   <header class="topbar">
     <div class="brand">
-      <div class="brandTitle">DM Session Hub</div>
-      <div class="brandSub" id="subTitle">Upload session notes to begin</div>
+      <div class="brand__title">THE IRONBOW: BASTION MANAGER</div>
+      <div class="brand__sub">Scarlett Isles • Bastion Turn Tools</div>
     </div>
 
-    <div class="topActions">
-      <button class="btn ghost" id="btnReset" title="Clear loaded PDF + summary">Reset</button>
+    <div class="topbar__controls">
+      <label class="field">
+        <span>Party Level</span>
+        <select id="levelSelect"></select>
+      </label>
+
+      <button id="rollEventBtn" class="btn">Roll Bastion Event</button>
+      <button id="advanceTurnBtn" class="btn btn--primary">Advance Bastion Turn (+7 days)</button>
+      <button id="resetBtn" class="btn btn--ghost" title="This only resets the app state (not your GitHub repo).">Reset</button>
     </div>
   </header>
 
-  <!-- UPLOADER SCREEN -->
-  <main class="shell" id="screenUpload">
-    <section class="panel hero">
-      <h1>DM Session Hub</h1>
-      <p class="muted">
-        Upload your session notes PDF. If your PDF has bookmarks like “Scene 1”, “Scene 2”, etc,
-        the hub will split it into clickable scenes automatically.
-      </p>
+  <main class="layout">
 
-      <label class="uploader">
-        <input id="pdfInput" type="file" accept="application/pdf" />
-        <span class="uploaderBtn">Choose PDF</span>
-        <span class="uploaderHint" id="uploadHint">No file selected</span>
-      </label>
-
-      <div class="hint">
-        Pro-tip: In your PDF editor, add bookmarks titled exactly <b>Scene 1</b>, <b>Scene 2</b>… for perfect splitting.
-      </div>
+    <!-- LEFT (Pink): Turn Log -->
+    <section class="leftCol">
+      <section class="card card--tall">
+        <div class="cardHeader">
+          <h2>Turn Log</h2>
+          <button class="btn btn--small" id="clearLogBtn">Clear log</button>
+        </div>
+        <div class="log log--tall" id="logList"></div>
+      </section>
     </section>
-  </main>
 
-  <!-- MAIN READER -->
-  <main class="shell" id="screenMain" hidden>
-    <section class="panel wide">
-      <div class="sceneBar" id="sceneBar"></div>
+    <!-- CENTER: Map ONLY -->
+    <section class="mainCol">
+      <!-- Red: Map -->
+      <section class="mapCard">
+        <div class="cardHeader">
+          <h2>Bastion Map</h2>
+          <div class="pill" id="turnPill">Turn 1</div>
+        </div>
+        <img class="mapImg" src="assets/bastion_artwork.png" alt="Bastion artwork" />
+        <div class="mapHint">
+          Tip: This tool saves automatically in your browser (local storage). Each player can have their own copy.
+        </div>
+      </section>
+    </section>
 
-      <div class="sceneBody">
-        <div class="sceneHeader">
-          <div>
-            <div class="sceneTitle" id="sceneTitle">Scene</div>
-            <div class="muted" id="sceneMeta"></div>
+    <!-- RIGHT (Purple): Bastion Events -->
+    <section class="rightCol">
+      <section class="card card--tall">
+        <div class="cardHeader">
+          <h2>Bastion Event</h2>
+        </div>
+        <div class="eventBox muted" id="eventBox">
+          Click <b>Roll Bastion Event</b> to generate a 1d100 event.
+        </div>
+      </section>
+    </section>
+
+    <!-- FULL-WIDTH: Management (now spans ALL columns) -->
+    <section class="fullRow">
+      <section class="card">
+        <div class="cardHeader">
+          <h2>Management</h2>
+        </div>
+
+        <div class="mgmtGrid">
+
+          <!-- LEFT (Yellow): Defenders -->
+          <div class="mgmtCol">
+            <div class="mgmtBox">
+              <div class="rowTop">
+                <div>
+                  <div class="label">Bastion Defenders</div>
+                  <div class="small muted" id="defendersMeta">Unarmed</div>
+                </div>
+                <div class="actions">
+                  <button class="btn btn--small" id="addDefBtn">+1 Defender</button>
+                  <button class="btn btn--small" id="subDefBtn">-1</button>
+                </div>
+              </div>
+
+              <div class="value" id="defendersValue">0</div>
+
+              <div class="label" style="margin-top:10px">Menagerie Beasts</div>
+              <div class="list" id="defenderRoster"></div>
+            </div>
           </div>
 
-          <div class="sceneNav">
-            <button class="btn ghost" id="btnPrev">◀ Prev</button>
-            <button class="btn" id="btnNext">Complete Scene - Next</button>
+          <!-- MIDDLE (Green): Treasury -->
+          <div class="mgmtCol">
+            <div class="mgmtBox">
+              <div class="label">Treasury (gp)</div>
+              <div class="small muted">Shared Bastion funds</div>
+
+              <div style="margin-top:10px">
+                <label class="field" style="margin:0">
+                  <input id="treasuryInput" type="number" min="0" step="1" />
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- RIGHT (Blue): Military -->
+          <div class="mgmtCol">
+            <div class="mgmtBox">
+              <div class="rowTop">
+                <div>
+                  <div class="label">Military</div>
+                  <div class="small muted">Units recruited from the War Room.</div>
+                </div>
+                <div class="actions">
+                  <button class="btn btn--small" id="clearMilitaryBtn">Clear</button>
+                </div>
+              </div>
+
+              <div class="list" id="militaryList"></div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+    </section>
+
+    <!-- FULL-WIDTH: Warehouse + Artisan Tools row (moved ABOVE Facilities) -->
+    <section class="fullRow">
+      <div class="whRow2">
+
+        <!-- Green: Warehouse -->
+        <section class="card">
+          <div class="cardHeader">
+            <h2>Warehouse</h2>
+          </div>
+
+          <div class="warehouseSub">
+            <div class="small muted">DM editable. Function outputs append here automatically when completed.</div>
+          </div>
+
+          <div class="warehouseWrap">
+            <div class="warehouseHead">
+              <div class="whCol">Item</div>
+              <div class="whCol whCol--qty">Qty</div>
+              <div class="whCol whCol--gp">GP</div>
+              <div class="whCol">Notes</div>
+              <div class="whCol whCol--act">Action</div>
+            </div>
+
+            <div class="warehouseBody" id="whTableBody">
+              <!-- rows injected by JS -->
+            </div>
+
+            <div class="warehouseActions">
+              <button class="btn btn--primary" id="addWarehouseRowBtn">Add Item</button>
+              <button class="btn" id="saveWarehouseBtn">Save Warehouse</button>
+              <button class="btn btn--small" id="clearWarehouseBtn">Clear</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Red: Artisan Tools -->
+        <section class="card">
+          <div class="cardHeader">
+            <h2>Artisan Tools</h2>
+          </div>
+
+          <div class="stack" style="padding-top:12px">
+            <div class="small muted">Select up to 6 tool/supply sets. Workshop Craft will use these.</div>
+
+            <div class="toolGrid" id="artisanToolGrid"></div>
+
+            <div class="actions" style="justify-content:flex-start">
+              <button class="btn" id="saveArtisanToolsBtn">Save</button>
+              <button class="btn btn--small" id="clearArtisanToolsBtn">Clear</button>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </section>
+
+    <!-- FULL-WIDTH: Facilities (now spans ALL columns) -->
+    <section class="fullRow">
+      <section class="card">
+        <div class="cardHeader">
+          <h2>Facilities</h2>
+          <div class="small muted">
+            Facilities unlock at levels 5 / 9 / 13 / 17. Locked facilities stay visible but disabled.
           </div>
         </div>
 
-        <div class="readerWrap">
-          <div class="reader" id="reader"></div>
+        <div class="facBuild">
+          <div class="facBuildTop">
+            <div>
+              <div class="label">Construction Slots</div>
+              <div class="small muted" id="slotMeta">—</div>
+            </div>
+            <div class="actions">
+              <button class="btn btn--small" id="clearBuildBtn">Clear extra builds</button>
+            </div>
+          </div>
+
+          <div id="slotList" class="slotList"></div>
         </div>
 
-        <div class="lootBox">
-          <label for="lootNotes">Loot notes for this scene</label>
-          <textarea id="lootNotes" placeholder="e.g. Dannick: Moonsteel Dagger • Em: 40gp • Maerys: Aurushi Sigil"></textarea>
-          <div class="hint">These notes get added to the final Session Summary when you click “Complete Scene - Next”.</div>
+        <div class="pendingWrap">
+          <div class="label">Pending Orders</div>
+          <div class="small muted">Orders complete when you click <b>Take Bastion Turn</b>.</div>
+          <div class="list" id="pendingList"></div>
         </div>
-      </div>
+
+        <div class="facilities" id="facilitiesGrid"></div>
+      </section>
     </section>
+
   </main>
 
-  <!-- SUMMARY -->
-  <main class="shell" id="screenSummary" hidden>
-    <section class="panel wide">
-      <div class="summaryHead">
-        <div>
-          <div class="sceneTitle">Session Summary</div>
-          <div class="muted">Revealed info + loot notes gathered as you ran the session.</div>
-        </div>
-        <div class="summaryActions">
-          <button class="btn ghost" id="btnBackToScenes">Back to Scenes</button>
-          <button class="btn" id="btnDownloadSummary">Download Session Summary (PDF)</button>
-        </div>
-      </div>
+  <footer class="footer">
+    <div class="small muted">Built for D&D Beyond campaigns. Data comes from your spreadsheet and is editable.</div>
+  </footer>
 
-      <div class="summaryBody" id="summaryBody"></div>
-    </section>
-  </main>
-
-  <!-- pdf.js (legacy build works nicely on GitHub Pages) -->
-  <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/legacy/build/pdf.min.js"></script>
-  <script>
-    if (window.pdfjsLib) {
-      pdfjsLib.GlobalWorkerOptions.workerSrc =
-        "https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/legacy/build/pdf.worker.min.js";
-    }
-  </script>
-
-  <!-- html2pdf for exporting the summary -->
-  <script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
-
-  <script src="./app.js"></script>
+  <script src="app.js" defer></script>
 </body>
 </html>
